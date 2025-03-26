@@ -7,42 +7,57 @@ import (
 func TestOperations(t *testing.T) {
 	tests := []struct {
 		name      string
-		function  func(float32, string, ...float32) float32
 		a         float32
-		b         string
-		c         float32
+		b         float32
+		operator  string
 		expected  float32
 		wantPanic bool
 	}{
-		{"Addition", Calculator, 2, "+", 3, 5, false},
-		{"Addition", Calculator, 2, "+", -2, 0, false},
-		{"Addition", Calculator, -2, "+", -2, -4, false},
-		{"Subtraction", Calculator, 10, "-", 4, 6, false},
-		{"Subtraction", Calculator, -10, "-", -4, -6, false},
-		{"Subtraction", Calculator, -10, "-", 4, -14, false},
-		{"Multiplication", Calculator, 10, "*", 4, 40, false},
-		{"Multiplication", Calculator, 10, "*", -4, -40, false},
-		{"Multiplication", Calculator, -10, "*", -4, 40, false},
-		{"Diviosn", Calculator, 10, "/", 2, 5, false},
-		{"Diviosn", Calculator, 10, "/", -2, -5, false},
-		{"Diviosn", Calculator, -10, "/", -2, 5, false},
-		{"Power", Calculator, 2, "^", 2, 4, false},
-		{"Power", Calculator, 2, "^", -2, 0.25, false},
-		{"Power", Calculator, -2, "^", -2, 0.25, false},
-		{"Power of two", Calculator, 2, "^2", 0, 4, false},
-		{"Power of two", Calculator, -2, "^2", 0, 4, false},
-		{"Power of cube", Calculator, -2, "^3", 0, -8, false},
-		{"Power of cube", Calculator, -2, "^3", 0, -8, false},
-		{"Power of cube", Calculator, 2, "^3", 0, 8, false},
-		{"Square Root", Calculator, 4, "sqrt", 0, 2, false},
-		{"Square of Root", Calculator, -2, "sqrt", 0, 0, true},
+		{"Addition", 2, 3, "+", 5, false},
+		{"Addition with negative", 2, -2, "+", 0, false},
+		{"Addition with negatives", -2, -2, "+", -4, false},
+		{"Subtraction", 10, 4, "-", 6, false},
+		{"Subtraction with negatives", -10, -4, "-", -6, false},
+		{"Subtraction mix", -10, 4, "-", -14, false},
+		{"Multiplication", 10, 4, "*", 40, false},
+		{"Multiplication with negative", 10, -4, "*", -40, false},
+		{"Multiplication with negatives", -10, -4, "*", 40, false},
+		{"Division", 10, 2, "/", 5, false},
+		{"Division with negative", 10, -2, "/", -5, false},
+		{"Division with negatives", -10, -2, "/", 5, false},
+		{"Division by zero", 10, 0, "/", 0, true}, // Expected to panic
+		{"Power", 2, 2, "^", 4, false},
+		{"Power with negative exponent", 2, -2, "^", 0.25, false},
+		{"Power with negative base", -2, -2, "^", 0.25, false},
+		{"Power of two", 2, 0, "^2", 4, false},
+		{"Power of two negative", -2, 0, "^2", 4, false},
+		{"Power of three", -2, 0, "^3", -8, false},
+		{"Power of three positive", 2, 0, "^3", 8, false},
+		{"Square Root", 4, 0, "sqrt", 2, false},
+		{"Square Root of Negative", -2, 0, "sqrt", 0, true}, // Expected to panic
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result := test.function(test.a, test.b, test.c)
-			if result != test.expected {
-				t.Errorf("%s(%f, %s, %f) = %f; want %f", test.name, test.a, test.b, test.c, result, test.expected)
+			// Handle expected panic cases
+			defer func() {
+				if r := recover(); r != nil {
+					if !test.wantPanic {
+						t.Errorf("Unexpected panic in test: %s, got: %v", test.name, r)
+					}
+				} else if test.wantPanic {
+					t.Errorf("Expected panic but did not occur in test: %s", test.name)
+				}
+			}()
+
+			if !test.wantPanic {
+				result := Calculator(test.a, test.operator, test.b)
+				if result != test.expected {
+					t.Errorf("%s failed: expected %f, got %f", test.name, test.expected, result)
+				}
+			} else {
+				// If we expect a panic, just call the function and let the defer handle it
+				Calculator(test.a, test.operator, test.b)
 			}
 		})
 	}
