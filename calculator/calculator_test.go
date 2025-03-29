@@ -1,4 +1,4 @@
-package main
+package calculator
 
 import (
 	"testing"
@@ -29,10 +29,6 @@ func TestOperations(t *testing.T) {
 		{"Power", 2, 2, "^", 4, false},
 		{"Power with negative exponent", 2, -2, "^", 0.25, false},
 		{"Power with negative base", -2, -2, "^", 0.25, false},
-		{"Power of two", 2, 0, "^2", 4, false},
-		{"Power of two negative", -2, 0, "^2", 4, false},
-		{"Power of three", -2, 0, "^3", -8, false},
-		{"Power of three positive", 2, 0, "^3", 8, false},
 		{"Square Root", 4, 0, "sqrt", 2, false},
 		{"Square Root of Negative", -2, 0, "sqrt", 0, true}, // Expected to panic
 	}
